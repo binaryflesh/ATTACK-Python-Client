@@ -1,10 +1,9 @@
-#!/usr/bin/env python
-
 # ATT&CK Client Main Script
 # Author: Roberto Rodriguez (@Cyb3rWard0g)
 # License: BSD 3-Clause
 # Reference:
-# https://www.mitre.org/capabilities/cybersecurity/overview/cybersecurity-blog/attck%E2%84%A2-content-available-in-stix%E2%84%A2-20-via
+#   https://www.mitre.org/capabilities/cybersecurity/overview/
+#   cybersecurity-blog/attck%E2%84%A2-content-available-in-stix%E2%84%A2-20-via
 # https://github.com/mitre/cti/blob/master/USAGE.md
 # https://github.com/oasis-open/cti-python-stix2/issues/183
 # https://stackoverflow.com/a/4406521
@@ -14,23 +13,26 @@ from stix2.utils import get_type_from_id
 from taxii2client import Collection
 import json
 
-ATTCK_STIX_COLLECTIONS = "https://cti-taxii.mitre.org/stix/collections/"
-ENTERPRISE_ATTCK = "95ecc380-afe9-11e4-9b6c-751b66dd541e"
-PRE_ATTCK = "062767bd-02d2-4b72-84ba-56caef0f8658"
-MOBILE_ATTCK = "2f669986-b40b-4423-b720-4396ca6a462b"
+_URI = "https://cti-taxii.mitre.org/stix/collections/"
+_SIG.ENT = "95ecc380-afe9-11e4-9b6c-751b66dd541e"
+_SIG.PRE = "062767bd-02d2-4b72-84ba-56caef0f8658"
+_SIG.MOB = "2f669986-b40b-4423-b720-4396ca6a462b"
 
-class attack_client(object):
-    ENTERPRISE_COLLECTION = Collection(ATTCK_STIX_COLLECTIONS + ENTERPRISE_ATTCK + "/")
-    PRE_COLLECTION = Collection(ATTCK_STIX_COLLECTIONS + PRE_ATTCK + "/")
-    MOBILE_COLLECTION = Collection(ATTCK_STIX_COLLECTIONS + MOBILE_ATTCK + "/")
+class ATTCK_(object):
+    _ENT = Collection(_URI + _SIG.ENT + "/")
+    _PRE = Collection(_URI + _SIG.PRE + "/")
+    _MOB = Collection(_URI + _SIG.MOB + "/")
     
-    TC_ENTERPRISE_SOURCE = TAXIICollectionSource(ENTERPRISE_COLLECTION)
-    TC_PRE_SOURCE = TAXIICollectionSource(PRE_COLLECTION)
-    TC_MOBILE_SOURCE = TAXIICollectionSource(MOBILE_COLLECTION)
-
-    COMPOSITE_DS = CompositeDataSource()
-    COMPOSITE_DS.add_data_sources([TC_ENTERPRISE_SOURCE, TC_PRE_SOURCE, TC_MOBILE_SOURCE])
-            
+    TC_ENT = TAXIICollectionSource(_ENT)
+    TC_PRE = TAXIICollectionSource(_PRE)
+    TC_MOB = TAXIICollectionSource(_MOB)
+    
+    COMP_DS = CompositeDataSource()
+    COMP_DS.add_data_sources([TC_ENT, TC_PRE, TC_MOB])
+    
+    #TODO: hashmap nested dict
+    #TODO: shorten variable names
+    #TODO: resourceful comments
     def translate_stix_objects(self, stix_objects):
         technique_stix_mapping = {
             "type": "type",
@@ -120,7 +122,6 @@ class attack_client(object):
             "description": "tactic_description",
             "x_mitre_shortname": "tactic_shortname",
             "external_references": "external_references"
-
         }
         matrix_stix_mapping = {
             "type": "type",
@@ -247,49 +248,49 @@ class attack_client(object):
         }
         enterprise_stix_objects = {}
         for key in enterprise_filter_objects:
-            enterprise_stix_objects[key] = (self.TC_ENTERPRISE_SOURCE.query(enterprise_filter_objects[key]))
+            enterprise_stix_objects[key] = (self.TC_ENT.query(enterprise_filter_objects[key]))
             if not stix_format:
                 enterprise_stix_objects[key] = self.translate_stix_objects(enterprise_stix_objects[key])
         return enterprise_stix_objects
 
     def get_enterprise_techniques(self, stix_format=True):
-        enterprise_techniques = self.TC_ENTERPRISE_SOURCE.query(Filter("type", "=", "attack-pattern"))
+        enterprise_techniques = self.TC_ENT.query(Filter("type", "=", "attack-pattern"))
         if not stix_format:
             enterprise_techniques = self.translate_stix_objects(enterprise_techniques)
         return enterprise_techniques
     
     def get_enterprise_mitigations(self, stix_format=True):
-        enterprise_mitigations = self.TC_ENTERPRISE_SOURCE.query(Filter("type", "=", "course-of-action"))
+        enterprise_mitigations = self.TC_ENT.query(Filter("type", "=", "course-of-action"))
         if not stix_format:
             enterprise_mitigations = self.translate_stix_objects(enterprise_mitigations)
         return enterprise_mitigations
     
     def get_enterprise_groups(self, stix_format=True):
-        enterprise_groups = self.TC_ENTERPRISE_SOURCE.query(Filter("type", "=", "intrusion-set"))
+        enterprise_groups = self.TC_ENT.query(Filter("type", "=", "intrusion-set"))
         if not stix_format:
             enterprise_groups = self.translate_stix_objects(enterprise_groups)
         return enterprise_groups
     
     def get_enterprise_malware(self, stix_format=True):
-        enterprise_malware = self.TC_ENTERPRISE_SOURCE.query(Filter("type", "=", "malware"))
+        enterprise_malware = self.TC_ENT.query(Filter("type", "=", "malware"))
         if not stix_format:
             enterprise_malware = self.translate_stix_objects(enterprise_malware)
         return enterprise_malware
     
     def get_enterprise_tools(self, stix_format=True):
-        enterprise_tools = self.TC_ENTERPRISE_SOURCE.query(Filter("type", "=", "tool"))
+        enterprise_tools = self.TC_ENT.query(Filter("type", "=", "tool"))
         if not stix_format:
             enterprise_tools = self.translate_stix_objects(enterprise_tools)
         return enterprise_tools
     
     def get_enterprise_relationships(self, stix_format=True):
-        enterprise_relationships = self.TC_ENTERPRISE_SOURCE.query(Filter("type", "=", "relationship"))
+        enterprise_relationships = self.TC_ENT.query(Filter("type", "=", "relationship"))
         if not stix_format:
             enterprise_relationships = self.translate_stix_objects(enterprise_relationships)
         return enterprise_relationships
     
     def get_enterprise_tactics(self, stix_format=True):
-        enterprise_tactics = self.TC_ENTERPRISE_SOURCE.query(Filter("type", "=", "x-mitre-tactic"))
+        enterprise_tactics = self.TC_ENT.query(Filter("type", "=", "x-mitre-tactic"))
         if not stix_format:
             enterprise_tactics = self.translate_stix_objects(enterprise_tactics)
         return enterprise_tactics
@@ -307,31 +308,31 @@ class attack_client(object):
         }
         pre_stix_objects = {}
         for key in pre_filter_objects:
-            pre_stix_objects[key] = self.TC_PRE_SOURCE.query(pre_filter_objects[key])
+            pre_stix_objects[key] = self.TC_PRE.query(pre_filter_objects[key])
             if not stix_format:
                 pre_stix_objects[key] = self.translate_stix_objects(pre_stix_objects[key])           
         return pre_stix_objects
 
     def get_pre_techniques(self, stix_format=True):
-        pre_techniques = self.TC_PRE_SOURCE.query(Filter("type", "=", "attack-pattern"))
+        pre_techniques = self.TC_PRE.query(Filter("type", "=", "attack-pattern"))
         if not stix_format:
             pre_techniques = self.translate_stix_objects(pre_techniques)
         return pre_techniques
 
     def get_pre_groups(self, stix_format=True):
-        pre_groups = self.TC_PRE_SOURCE.query(Filter("type", "=", "intrusion-set"))
+        pre_groups = self.TC_PRE.query(Filter("type", "=", "intrusion-set"))
         if not stix_format:
             pre_groups = self.translate_stix_objects(pre_groups)
         return pre_groups
 
     def get_pre_relationships(self, stix_format=True):
-        pre_relationships = self.TC_PRE_SOURCE.query(Filter("type", "=", "relationship"))
+        pre_relationships = self.TC_PRE.query(Filter("type", "=", "relationship"))
         if not stix_format:
             pre_relationships = self.translate_stix_objects(pre_relationships)
         return pre_relationships
     
     def get_pre_tactics(self, stix_format=True):
-        pre_tactics = self.TC_PRE_SOURCE.query(Filter("type", "=", "x-mitre-tactic"))
+        pre_tactics = self.TC_PRE.query(Filter("type", "=", "x-mitre-tactic"))
         if not stix_format:
             pre_tactics = self.translate_stix_objects(pre_tactics)
         return pre_tactics
@@ -352,49 +353,49 @@ class attack_client(object):
         }
         mobile_stix_objects = {}
         for key in mobile_filter_objects:
-            mobile_stix_objects[key] = self.TC_MOBILE_SOURCE.query(mobile_filter_objects[key])
+            mobile_stix_objects[key] = self.TC_MOB.query(mobile_filter_objects[key])
             if not stix_format:
                 mobile_stix_objects[key] = self.translate_stix_objects(mobile_stix_objects[key])           
         return mobile_stix_objects
   
     def get_mobile_techniques(self, stix_format=True):
-        mobile_techniques = self.TC_MOBILE_SOURCE.query(Filter("type", "=", "attack-pattern"))
+        mobile_techniques = self.TC_MOB.query(Filter("type", "=", "attack-pattern"))
         if not stix_format:
             mobile_techniques = self.translate_stix_objects(mobile_techniques)
         return mobile_techniques
     
     def get_mobile_mitigations(self, stix_format=True):
-        mobile_mitigations = self.TC_MOBILE_SOURCE.query(Filter("type", "=", "course-of-action"))
+        mobile_mitigations = self.TC_MOB.query(Filter("type", "=", "course-of-action"))
         if not stix_format:
             mobile_mitigations = self.translate_stix_objects(mobile_mitigations)
         return mobile_mitigations
 
     def get_mobile_groups(self, stix_format=True):
-        mobile_groups = self.TC_MOBILE_SOURCE.query(Filter("type", "=", "intrusion-set"))
+        mobile_groups = self.TC_MOB.query(Filter("type", "=", "intrusion-set"))
         if not stix_format:
             mobile_groups = self.translate_stix_objects(mobile_groups)
         return mobile_groups
     
     def get_mobile_malware(self, stix_format=True):
-        mobile_malware = self.TC_MOBILE_SOURCE.query(Filter("type", "=", "malware"))
+        mobile_malware = self.TC_MOB.query(Filter("type", "=", "malware"))
         if not stix_format:
             mobile_malware = self.translate_stix_objects(mobile_malware)
         return mobile_malware
     
     def get_mobile_tools(self, stix_format=True):
-        mobile_tools = self.TC_MOBILE_SOURCE.query(Filter("type", "=", "tool"))
+        mobile_tools = self.TC_MOB.query(Filter("type", "=", "tool"))
         if not stix_format:
             mobile_tools = self.translate_stix_objects(mobile_tools)
         return mobile_tools
 
     def get_mobile_relationships(self, stix_format=True):
-        mobile_relationships = self.TC_MOBILE_SOURCE.query(Filter("type", "=", "relationship"))
+        mobile_relationships = self.TC_MOB.query(Filter("type", "=", "relationship"))
         if not stix_format:
             mobile_relationships = self.translate_stix_objects(mobile_relationships)
         return mobile_relationships
     
     def get_mobile_tactics(self, stix_format=True):
-        mobile_tactics = self.TC_MOBILE_SOURCE.query(Filter("type", "=", "x-mitre-tactic"))
+        mobile_tactics = self.TC_MOB.query(Filter("type", "=", "x-mitre-tactic"))
         if not stix_format:
             mobile_tactics = self.translate_stix_objects(mobile_tactics)
         return mobile_tactics
@@ -534,7 +535,7 @@ class attack_client(object):
                 Filter('type', '=', 'attack-pattern'),
                 Filter('x_mitre_platforms', '=', name)
             ]
-            all_techniques_list = self.COMPOSITE_DS.query(filter_objects)
+            all_techniques_list = self.COMP_DS.query(filter_objects)
         if not stix_format:
             all_techniques_list = self.translate_stix_objects(all_techniques_list)
         return all_techniques_list
@@ -552,7 +553,7 @@ class attack_client(object):
                 Filter('type', '=', 'attack-pattern'),
                 Filter('kill_chain_phases.phase_name', '=', name)
             ]
-            all_techniques_list = self.COMPOSITE_DS.query(filter_objects)
+            all_techniques_list = self.COMP_DS.query(filter_objects)
         if not stix_format:
             all_techniques_list = self.translate_stix_objects(all_techniques_list)
         return all_techniques_list
@@ -566,7 +567,7 @@ class attack_client(object):
                 Filter('type', '=', object_type),
                 Filter('external_references.external_id', '=', attack_id)
             ]
-            all_stix_objects = self.COMPOSITE_DS.query(filter_objects)
+            all_stix_objects = self.COMP_DS.query(filter_objects)
             if not stix_format:
                 all_stix_objects = self.translate_stix_objects(all_stix_objects)
             return all_stix_objects
@@ -585,7 +586,7 @@ class attack_client(object):
                 Filter('type', '=', 'intrusion-set'),
                 Filter('aliases', '=', group_alias)
             ]
-            all_groups_list = self.COMPOSITE_DS.query(filter_objects)
+            all_groups_list = self.COMP_DS.query(filter_objects)
         if not stix_format:
             all_groups_list = self.translate_stix_objects(all_groups_list)
         return all_groups_list
@@ -595,16 +596,16 @@ class attack_client(object):
             Filter('type', '=', 'attack-pattern'),
             Filter('created', '>', timestamp)
         ]
-        all_techniques_list = self.COMPOSITE_DS.query(filter_objects)
+        all_techniques_list = self.COMP_DS.query(filter_objects)
         if not stix_format:
             all_techniques_list = self.translate_stix_objects(all_techniques_list)
         return all_techniques_list
 
     def get_relationships_by_object(self, stix_object, stix_format=True):
         if stix_object['type'] == 'course-of-action':
-            relationships = self.COMPOSITE_DS.relationships(stix_object, 'mitigates', source_only=True)
+            relationships = self.COMP_DS.relationships(stix_object, 'mitigates', source_only=True)
         else:
-            relationships = self.COMPOSITE_DS.relationships(stix_object, 'uses', source_only=True)
+            relationships = self.COMP_DS.relationships(stix_object, 'uses', source_only=True)
         if not stix_format:
             relationships = self.translate_stix_objects(relationships)
         return relationships
@@ -616,15 +617,15 @@ class attack_client(object):
             Filter('id', '=', [r.target_ref for r in relationships])
         ]
         try:
-            enterprise_stix_objects = self.TC_ENTERPRISE_SOURCE.query(filter_objects)
+            enterprise_stix_objects = self.TC_ENT.query(filter_objects)
         except:
             enterprise_stix_objects = []
         try:
-            pre_stix_objects = self.TC_PRE_SOURCE.query(filter_objects)
+            pre_stix_objects = self.TC_PRE.query(filter_objects)
         except:
             pre_stix_objects = []
         try:
-            mobile_stix_objects = self.TC_MOBILE_SOURCE.query(filter_objects)
+            mobile_stix_objects = self.TC_MOB.query(filter_objects)
         except:
             mobile_stix_objects = []
         all_techniques_list = enterprise_stix_objects + pre_stix_objects + mobile_stix_objects
@@ -643,15 +644,15 @@ class attack_client(object):
             Filter('id', '=', [r.target_ref for r in software_relationships])
         ]
         try:
-            enterprise_stix_objects = self.TC_ENTERPRISE_SOURCE.query(filter_objects)
+            enterprise_stix_objects = self.TC_ENT.query(filter_objects)
         except:
             enterprise_stix_objects = []
         try:
-            pre_stix_objects = self.TC_PRE_SOURCE.query(filter_objects)
+            pre_stix_objects = self.TC_PRE.query(filter_objects)
         except:
             pre_stix_objects = []
         try:
-            mobile_stix_objects = self.TC_MOBILE_SOURCE.query(filter_objects)
+            mobile_stix_objects = self.TC_MOB.query(filter_objects)
         except:
             mobile_stix_objects = []
         all_software_list = enterprise_stix_objects + pre_stix_objects + mobile_stix_objects
@@ -670,15 +671,15 @@ class attack_client(object):
             Filter('id', '=', [r.target_ref for r in software_relationships])
         ]
         try:
-            enterprise_stix_objects = self.TC_ENTERPRISE_SOURCE.query(filter_objects)
+            enterprise_stix_objects = self.TC_ENT.query(filter_objects)
         except:
             enterprise_stix_objects = []
         try:
-            pre_stix_objects = self.TC_PRE_SOURCE.query(filter_objects)
+            pre_stix_objects = self.TC_PRE.query(filter_objects)
         except:
             pre_stix_objects = []
         try:
-            mobile_stix_objects = self.TC_MOBILE_SOURCE.query(filter_objects)
+            mobile_stix_objects = self.TC_MOB.query(filter_objects)
         except:
             mobile_stix_objects = []
         all_techniques_list = enterprise_stix_objects + pre_stix_objects + mobile_stix_objects
@@ -701,15 +702,15 @@ class attack_client(object):
             Filter('source_ref', 'in', [r.target_ref for r in software_relationships])
         ]
         try:
-            enterprise_stix_objects = self.TC_ENTERPRISE_SOURCE.query(filter_objects)
+            enterprise_stix_objects = self.TC_ENT.query(filter_objects)
         except:
             enterprise_stix_objects = []
         try:
-            pre_stix_objects = self.TC_PRE_SOURCE.query(filter_objects)
+            pre_stix_objects = self.TC_PRE.query(filter_objects)
         except:
             pre_stix_objects = []
         try:
-            mobile_stix_objects = self.TC_MOBILE_SOURCE.query(filter_objects)
+            mobile_stix_objects = self.TC_MOB.query(filter_objects)
         except:
             mobile_stix_objects = []
         software_uses = enterprise_stix_objects + pre_stix_objects + mobile_stix_objects
@@ -719,15 +720,15 @@ class attack_client(object):
             Filter('id', 'in', [s.target_ref for s in software_uses])
         ]
         try:
-            enterprise_stix_objects = self.TC_ENTERPRISE_SOURCE.query(filter_techniques)
+            enterprise_stix_objects = self.TC_ENT.query(filter_techniques)
         except:
             enterprise_stix_objects = []
         try:
-            pre_stix_objects = self.TC_PRE_SOURCE.query(filter_techniques)
+            pre_stix_objects = self.TC_PRE.query(filter_techniques)
         except:
             pre_stix_objects = []
         try:
-            mobile_stix_objects = self.TC_MOBILE_SOURCE.query(filter_techniques)
+            mobile_stix_objects = self.TC_MOB.query(filter_techniques)
         except:
             mobile_stix_objects = []
         all_techniques_list = enterprise_stix_objects + pre_stix_objects + mobile_stix_objects
@@ -746,15 +747,15 @@ class attack_client(object):
             Filter('id', '=', [r.target_ref for r in mitigation_relationships])
         ]
         try:
-            enterprise_stix_objects = self.TC_ENTERPRISE_SOURCE.query(filter_objects)
+            enterprise_stix_objects = self.TC_ENT.query(filter_objects)
         except:
             enterprise_stix_objects = []
         try:
-            pre_stix_objects = self.TC_PRE_SOURCE.query(filter_objects)
+            pre_stix_objects = self.TC_PRE.query(filter_objects)
         except:
             pre_stix_objects = []
         try:
-            mobile_stix_objects = self.TC_MOBILE_SOURCE.query(filter_objects)
+            mobile_stix_objects = self.TC_MOB.query(filter_objects)
         except:
             mobile_stix_objects = []
         all_techniques_list = enterprise_stix_objects + pre_stix_objects + mobile_stix_objects
